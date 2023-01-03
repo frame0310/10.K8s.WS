@@ -6,7 +6,7 @@ metadata:
     app: ubuntu
 spec:
   containers:
-    - image: ghcr.io/pluhin/22busy-box:latest
+    - image: ghcr.io/pluhin/busy-box:latest
       command:
       - "sleep"
       - "604800"
