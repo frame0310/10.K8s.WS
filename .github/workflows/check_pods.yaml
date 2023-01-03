@@ -1,4 +1,5 @@
-name: Check pods in SA
+name: k3s check pods
+
 on: 
   push:
   schedule:
@@ -10,14 +11,15 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Connect to host with proxy with out password
+      - name: Connect to K3S host
         id: get_pods
         run: |
            mkdir ~/.ssh
            eval `ssh-agent -s`
-           ssh-add - <<< "${{secrets.SSH_KEY}}" 
+           ssh-add - <<< "${{ secrets.SSH_KEY }}" 
            ssh-keyscan -H ${{ secrets.BASTION_IP }} >> ~/.ssh/known_hosts
-           ssh ${{ secrets.K3SHOST_UN }}@${{ secrets.K3SHOST_IP }} -o ProxyCommand="ssh -W %h:%p ${{ secrets.BASTION_UN }}@${{ secrets.K3SHOST_IP }}" -o StrictHostKeyChecking=no "kubectl get pods -A" >> report  
+           ssh ${{ secrets.K3SHOST_UN }}@${{ secrets.K3SHOST_IP }} -o ProxyCommand="ssh -W %h:%p ${{ secrets.BASTION_UN }}@${{ secrets.K3SHOST_IP }}"
+           kubectl get pods -A >> report  
           # echo 'EOF' >> $GITHUB_ENV
            
       #- name: output pods
@@ -25,11 +27,11 @@ jobs:
       #  run: |
       #     echo "$CONTENT_ENV" >> pods.log 2>&1
            
-      #- name: Upload pods
-      #  uses: actions/upload-artifact@v2
-      #  with:
-      #    path: pods.log
-          
+      - name: Upload pods
+        uses: actions/upload-artifact@v2
+        with:
+          path: report
+
       #- name: output crashed pods
       #  id: out_pods_failed    
       #  run: |
