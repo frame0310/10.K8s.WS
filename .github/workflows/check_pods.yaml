@@ -19,8 +19,7 @@ jobs:
            ssh-add - <<< "${{ secrets.SSH_KEY }}" 
            ssh-keyscan -H ${{ secrets.BASTION_IP }} >> ~/.ssh/known_hosts
            ssh ${{ secrets.BASTION_UN }}@${{ secrets.BASTION_IP}} ssh-keyscan ${{ secrets.K3SHOST_IP }} >> ~/.ssh/known_hosts
-           ssh -o ProxyCommand="ssh -W %h:%p ${{ secrets.BASTION_UN }}@${{ secrets.BASTION_IP }}" ${{ secrets.K3SHOST_UN }}@${{ secrets.K3SHOST_IP }}
-          # kubectl get pods -A >> report  
+           ssh -o ProxyCommand="ssh -W %h:%p ${{ secrets.BASTION_UN }}@${{ secrets.BASTION_IP }}" ${{ secrets.K3SHOST_UN }}@${{ secrets.K3SHOST_IP }} "kubectl get pods -A" >> report  
           
 
       - name: upload pod's list
