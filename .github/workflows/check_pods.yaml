@@ -2,8 +2,8 @@ name: k3s check pods
 
 on: 
   push:
-  schedule:
-    - cron: "*/10 * * * *"
+  #schedule:
+  #  - cron: "*/10 * * * *"
 env:
   report: report.log
 
@@ -18,41 +18,12 @@ jobs:
            eval `ssh-agent -s`
            ssh-add - <<< "${{ secrets.SSH_KEY }}" 
            ssh-keyscan -H ${{ secrets.BASTION_IP }} >> ~/.ssh/known_hosts
-           ssh ${{ secrets.K3SHOST_UN }}@${{ secrets.K3SHOST_IP }} -o ProxyCommand="ssh -W %h:%p ${{ secrets.BASTION_UN }}@${{ secrets.K3SHOST_IP }}"
-           kubectl get pods -A >> report  
-          # echo 'EOF' >> $GITHUB_ENV
-           
-      #- name: output pods
-      #  id: out_pods    
-      #  run: |
-      #     echo "$CONTENT_ENV" >> pods.log 2>&1
-           
-      - name: Upload pods
+           ssh ${{ secrets.BASTION_UN }}@${{ secrets.BASTION_IP}} ssh-keyscan ${{ secrets.K3SHOST_IP }} >> ~/.ssh/known_hosts
+           ssh -o ProxyCommand="ssh -W %h:%p ${{ secrets.BASTION_UN }}@${{ secrets.BASTION_IP }}" ${{ secrets.K3SHOST_UN }}@${{ secrets.K3SHOST_IP }}
+          # kubectl get pods -A >> report  
+          
+
+      - name: upload pod's list
         uses: actions/upload-artifact@v2
         with:
           path: report
-
-      #- name: output crashed pods
-      #  id: out_pods_failed    
-      #  run: |
-      #     echo "$CONTENT_ENV" > pods.txt           
-      #     echo "$(cat pods.txt | grep -v Running)" >> pods_crashed.log 2>&1
-      #     echo "crashed=$(cat pods.txt | grep -v Running | wc -l)" >> $GITHUB_OUTPUT
-          
-      #- name: Upload report
-      #  if: steps.out_pods_failed.outputs.crashed > 1
-      #  uses: actions/upload-artifact@v2
-      #  with:
-      #    path: pods_crashed.log       
- 
-      #- name: Slack Notification
-      #  if: steps.out_pods_failed.outputs.crashed > 1
-      #  uses: rtCamp/action-slack-notify@v2
-      #  env:
-      #    SLACK_CHANNEL: crashed_pods-from-sa
-      #    SLACK_COLOR: '#FF0000'
-      #    SLACK_ICON: https://github.com/rtCamp.png?size=48
-      #    SLACK_MESSAGE: 'We have crashed pods!!!'
-      #    SLACK_TITLE: 'ALERT! Check pods_crashed.log in artifact'
-      #    SLACK_USERNAME: Kostenko Pavel
-      #    SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
