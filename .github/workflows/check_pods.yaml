@@ -2,8 +2,8 @@ name: k3s check pods
 
 on: 
   push:
-  #schedule:
-  #  - cron: "*/10 * * * *"
+  schedule:
+    - cron: "*/10 * * * *"
 env:
   report: report.log
   crash_report: crash_report.log
